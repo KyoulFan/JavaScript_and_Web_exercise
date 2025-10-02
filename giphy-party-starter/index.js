@@ -1,34 +1,55 @@
 // look back at the <readme.md> file for some hints //
 // working API key //
 const giphyApiKey = "MhAodEJIJxQMxW9XqxKjyXfNYdLoOIym";
-const button = document.getElementById("generate-button");
-const giphyDisplay = document.getElementById("gify-display");
+const generateButton = document.getElementById("generate-button");
+const clearButton = document.getElementById("clear-button");
+const displayDiv = document.getElementById("display-div");
 
+generateButton.addEventListener("click", generateGif);
+clearButton.addEventListener("click", clearGifs);
 
+async function grabGifFromApi(query) {
+  const response = await axios.get(//how to 
+    `http://api.giphy.com/v1/gifs/search?q=${query}&api_key=${giphyApiKey}&limit=10`
+  );
+  return response.data.data.map((val) => {
+    return {
+      gifURL: val.images.fixed_width.url,
+    }; //how to know?
+  });
+}
+function getInputData() {
+  const inputData = document.getElementById("search-term");
+  return inputData.value;
+}
+async function generateGif(e) {
+  e.preventDefault();
+  displayDiv.innerHTML = "";
+  const inputData = getInputData();
 
+  const gifs = await grabGifFromApi(inputData);
 
-button.addEventListener("click", () => {
-    console.log("button clicked");
-    giphyRequest();
-});
+  const firstRow = document.createElement("div");
+  const secondRow = document.createElement("div");
 
-async function giphyRequest() {
-    let newDiv = document.createElement("div");
-    let newH3 = document.createElement("h3");
-    let newImg = document.createElement("img");
-    try {
-        const response = await axios.get(`http://api.giphy.com/v1/gifs/trending?api_key=${giphyApiKey}&limit=10`);
-        console.log(response);
-        giphyDisplay.innerHTML=" ";
-        newH3.innerHTML = response.data.data[0].title;
-        newImg.src = response.data.data[0].images.downsized.url;
-        newDiv.appendChild(newH3);
-        newDiv.appendChild(newImg);
-        giphyDisplay.appendChild(newDiv);
-    } catch (error) {
-    {
-        console.error(error);
-    }
+  firstRow.classList.add("row", "first-row");
+  secondRow.classList.add("row", "second-row");
+
+  for (let i = 0; i < gifs.length / 2; i++) {
+    const img = document.createElement("img");
+    img.src = gifs[i].gifURL;
+    firstRow.appendChild(img);
+  }
+  for (let i = gifs.length / 2; i < gifs.length; i++) {
+    const img = document.createElement("img");
+    img.src = gifs[i].gifURL;
+    secondRow.appendChild(img);
+  }
+  displayDiv.appendChild(firstRow);
+  displayDiv.appendChild(secondRow);
 }
 
+function clearGifs(e) {
+  displayDiv.innerHTML = "";
+  displayDiv.innerHTML = "...GIF here...";
 }
